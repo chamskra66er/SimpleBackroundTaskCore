@@ -8,7 +8,7 @@ namespace SimpleBackgroundTask.Models
     public class Domains
     {
         public int Id { get; set; }
-        public string ServerName{get; set;}
+        public string ServerName {get; set;}
         public bool Status { get; set; }
         public string Url { get; set; }
     }
