@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SimpleBackgroundTask.Services;
 
 namespace SimpleBackgroundTask
 {
@@ -30,6 +31,8 @@ namespace SimpleBackgroundTask
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddControllersWithViews();
 
+            services.AddScoped<IDomainService, DomainService>();
+
             services.AddHangfire(config=>
             config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
             .UseSimpleAssemblyNameTypeSerializer()
@@ -39,6 +42,7 @@ namespace SimpleBackgroundTask
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        [Obsolete]
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
             IBackgroundJobClient backgroundJobClient,
             IRecurringJobManager recurringJobManager)
@@ -71,7 +75,7 @@ namespace SimpleBackgroundTask
             backgroundJobClient.Enqueue(() => Console.WriteLine("BackgroungTask"));
             recurringJobManager.AddOrUpdate("Run every 10 minute",
                 () => Console.WriteLine("Test recurring job"),
-                "* * * * *"
+                Cron.MinuteInterval(10)
                 );
         }
     }
