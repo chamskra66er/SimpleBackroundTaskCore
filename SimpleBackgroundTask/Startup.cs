@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Hangfire;
+using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -27,10 +29,19 @@ namespace SimpleBackgroundTask
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddControllersWithViews();
+
+            services.AddHangfire(config=>
+            config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseDefaultTypeSerializer()
+            .UseMemoryStorage());
+            services.AddHangfireServer();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
+            IBackgroundJobClient backgroundJobClient,
+            IRecurringJobManager recurringJobManager)
         {
             if (env.IsDevelopment())
             {
@@ -55,6 +66,13 @@ namespace SimpleBackgroundTask
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            app.UseHangfireDashboard();
+            backgroundJobClient.Enqueue(() => Console.WriteLine("BackgroungTask"));
+            recurringJobManager.AddOrUpdate("Run every 10 minute",
+                () => Console.WriteLine("Test recurring job"),
+                "* * * * *"
+                );
         }
     }
 }
