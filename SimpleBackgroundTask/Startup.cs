@@ -45,7 +45,8 @@ namespace SimpleBackgroundTask
         [Obsolete]
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
             IBackgroundJobClient backgroundJobClient,
-            IRecurringJobManager recurringJobManager)
+            IRecurringJobManager recurringJobManager, 
+            IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
@@ -74,8 +75,8 @@ namespace SimpleBackgroundTask
             app.UseHangfireDashboard();
             backgroundJobClient.Enqueue(() => Console.WriteLine("BackgroungTask"));
             recurringJobManager.AddOrUpdate("Run every 10 minute",
-                () => Console.WriteLine("Test recurring job"),
-                Cron.MinuteInterval(10)
+                () => serviceProvider.GetService<IDomainService>().ChekDomain(),
+                Cron.MinuteInterval(2)
                 );
         }
     }

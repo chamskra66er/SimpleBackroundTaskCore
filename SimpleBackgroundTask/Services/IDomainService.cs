@@ -9,5 +9,6 @@ namespace SimpleBackgroundTask.Services
     public interface IDomainService
     {
         IEnumerable<Domains> GetAll();
+        void ChekDomain();
     }
 }
