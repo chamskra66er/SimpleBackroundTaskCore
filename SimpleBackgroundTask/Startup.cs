@@ -32,6 +32,9 @@ namespace SimpleBackgroundTask
             services.AddControllersWithViews();
 
             services.AddScoped<IDomainService, DomainService>();
+            services.AddScoped<ISendMessage, SendMessage>();
+
+            services.AddHttpClient();
 
             services.AddHangfire(config=>
             config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
@@ -75,7 +78,7 @@ namespace SimpleBackgroundTask
             app.UseHangfireDashboard();
             backgroundJobClient.Enqueue(() => Console.WriteLine("BackgroungTask"));
             recurringJobManager.AddOrUpdate("Run every 10 minute",
-                () => serviceProvider.GetService<IDomainService>().ChekDomain(),
+               () => serviceProvider.GetService<IDomainService>().ChekDomain(),
                 Cron.MinuteInterval(2)
                 );
         }

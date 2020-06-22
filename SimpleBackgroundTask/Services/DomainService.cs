@@ -1,4 +1,5 @@
-﻿using SimpleBackgroundTask.Models;
+﻿using SimpleBackgroundTask.Controllers;
+using SimpleBackgroundTask.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +12,11 @@ namespace SimpleBackgroundTask.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly int timeOut = 10000;
-        public DomainService(ApplicationDbContext context)
+        private readonly ISendMessage _send;
+        public DomainService(ApplicationDbContext context, ISendMessage send)
         {
             _context = context;
+            _send = send;
         }
 
         public void ChekDomain()
@@ -32,7 +35,8 @@ namespace SimpleBackgroundTask.Services
                     {
                         string message = "host" + item.ServerName + " is available";
                         Console.WriteLine(message);
-                        Console.WriteLine("host is not available");
+                        //await _homeController.SendMessage(host, item.ServerName, "host is available");
+                        _send.Send(host, item.ServerName, "host is available");
                     }
                     else
                     {
